@@ -1,4 +1,15 @@
 # PhotoCloud
+demo
+
+https://cphoto.pp.ua/
+
+login: demo@demo.com
+password: demo
+
+
+
+
+install
 
 https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe
 
