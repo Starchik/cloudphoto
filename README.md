@@ -1,24 +1,37 @@
 # PhotoCloud
-demo
 
-https://cphoto.pp.ua/
+## Demo
+[Live Demo](https://cphoto.pp.ua/)
 
-login: demo@demo.com
-password: demo
+**Login:** demo@demo.com  
+**Password:** demo
 
+---
 
+## Installation
 
+1. **Download and install Python 3.12.5**  
+   [Python 3.12.5 (64-bit)](https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe)
 
-install
+2. **Download and install Microsoft Visual C++ Redistributable**  
+   [VC Redist x64](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
-https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe
+3. **Navigate to the PhotoCloud folder**
+   ```sh
+   cd PhotoCloud
+   ```
+   *Example:*
+   ```sh
+   cd C:\Users\pc\Desktop\photononavx
+   ```
 
-https://aka.ms/vs/17/release/vc_redist.x64.exe
+4. **Install dependencies**
+   ```sh
+   pip install -r requirements.txt
+   ```
 
-cd PhotoCloud folder
+5. **Upgrade pip**
+   ```sh
+   python.exe -m pip install --upgrade pip
+   ```
 
-example: cd C:\Users\pc\Desktop\photononavx
-
-pip install -r requirements.txt
-
-python.exe -m pip install --upgrade pip
