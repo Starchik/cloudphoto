@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Upload Photos</h1>
+        <a href="{{ url_for('gallery') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Gallery
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input class="form-control" 
+                           type="file" 
+                           name="file" 
+                           multiple
+                           accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-custom">
+                    <i class="bi bi-cloud-upload"></i> Upload Selected Files
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h5>Supported formats:</h5>
+        <div class="text-muted">JPEG, PNG, GIF, HEIC</div>
+    </div>
+</div>
+{% endblock %}

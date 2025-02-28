@@ -1,0 +1,196 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Your Media</h1>
+        <div>
+            <button id="downloadBtn" type="button" class="btn btn-custom" onclick="downloadSelected()">
+                <i class="bi bi-download"></i> Download
+            </button>
+            <button class="btn btn-danger" onclick="deleteSelected()">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+            <a href="{{ url_for('upload') }}" class="btn btn-custom">
+                <i class="bi bi-cloud-upload"></i> Upload
+            </a>
+        </div>
+    </div>
+
+    <form id="downloadForm" method="POST" action="{{ url_for('download') }}">
+        {% set ns = namespace(current_group=None) %}
+        {% for media in medias %}
+            {% if media.capture_date %}
+                {% set group = media.capture_date.strftime('%B %Y') %}
+            {% else %}
+                {% set group = 'Без даты' %}
+            {% endif %}
+
+            {% if group != ns.current_group %}
+                {% if not loop.first %}
+                    </div>
+                {% endif %}
+                <h3 class="mt-4">{{ group }}</h3>
+                <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                {% set ns.current_group = group %}
+            {% endif %}
+
+            <div class="col">
+                <div class="card drive-card selectable" data-id="{{ media.id }}">
+                    <div class="card-img-top-container">
+                        {% if media.file_type == 'image' %}
+                            <!-- Отображаем миниатюру; при клике открывается оригинальное изображение -->
+                            <a href="{{ url_for('image', media_id=media.id) }}" target="_blank">
+                                <img src="{{ url_for('thumbnail', media_id=media.id) }}" class="card-img-top">
+                            </a>
+                        {% else %}
+                            <video class="card-img-top" controls>
+                                <source src="{{ url_for('image', media_id=media.id) }}" type="video/mp4">
+                            </video>
+                        {% endif %}
+                        <div class="checkmark"><i class="bi bi-check2-circle"></i></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                {{ media.capture_date.strftime('%d %b %Y %H:%M') if media.capture_date else 'Date unknown' }}
+                            </small>
+                            <div class="btn-group">
+                                <a href="{{ url_for('image', media_id=media.id) }}" class="btn btn-primary btn-sm" target="_blank">
+                                    <i class="bi bi-arrows-angle-expand"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="checkbox" name="selected" value="{{ media.id }}" class="d-none">
+                </div>
+            </div>
+
+            {% if loop.last %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <h4 class="text-muted">No media found</h4>
+                <a href="{{ url_for('upload') }}" class="btn btn-custom mt-3">
+                    Upload First File
+                </a>
+            </div>
+        {% endfor %}
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectables = document.querySelectorAll('.selectable');
+    selectables.forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button, video')) {
+                return;
+            }
+            const checkbox = this.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            this.classList.toggle('selected');
+        });
+    });
+});
+
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('input[name="selected"]:checked'))
+               .map(checkbox => checkbox.value);
+}
+
+function downloadSelected() {
+    const selectedIds = getSelectedIds();
+    if (selectedIds.length === 0) {
+        alert('Please select files to download');
+        return;
+    }
+    const downloadBtn = document.querySelector('#downloadBtn');
+    downloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Preparing...';
+    downloadBtn.disabled = true;
+    document.getElementById('downloadForm').submit();
+    setTimeout(() => {
+        downloadBtn.innerHTML = '<i class="bi bi-download"></i> Download';
+        downloadBtn.disabled = false;
+    }, 3000);
+}
+
+function deleteSelected() {
+    const selectedIds = getSelectedIds();
+    if (selectedIds.length === 0) {
+        alert('Please select files to delete');
+        return;
+    }
+    if (confirm('Are you sure you want to delete selected files?')) {
+        fetch("{{ url_for('delete_selected') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ selected: selectedIds })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error deleting files');
+            }
+        });
+    }
+}
+</script>
+
+<style>
+.selectable {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.selectable:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.selected {
+    border: 2px solid #10A37F;
+    background: rgba(16, 163, 127, 0.05);
+}
+.checkmark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #10A37F;
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+.selected .checkmark {
+    opacity: 1;
+}
+.card-img-top-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+}
+.card-img-top {
+    transition: transform 0.2s ease;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+.card-body {
+    padding: 1rem;
+    background: #444654;
+    border-radius: 0 0 8px 8px;
+}
+.btn-group {
+    position: relative;
+    z-index: 3;
+}
+#downloadBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+</style>
+{% endblock %}
